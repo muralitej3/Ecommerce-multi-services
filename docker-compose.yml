@@ -19,7 +19,7 @@ services:
   # ******************
   # Accounting service
   accounting:
-    image: muraligorantla/accounting:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-accounting
     container_name: accounting
     build:
       context: ./
@@ -48,7 +48,7 @@ services:
 
   # AdService
   ad:
-    image: muraligorantla/ad:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-ad
     container_name: ad
     build:
       context: ./
@@ -84,7 +84,7 @@ services:
 
   # Cart service
   cart:
-    image: muraligorantla/cart:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-cart
     container_name: cart
     build:
       context: ./
@@ -119,7 +119,7 @@ services:
 
   # Checkout service
   checkout:
-    image: muraligorantla/checkout:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-checkout
     container_name: checkout
     build:
       context: ./
@@ -172,7 +172,7 @@ services:
 
   # Currency service
   currency:
-    image: muraligorantla/currency:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-currency
     container_name: currency
     build:
       context: ./
@@ -203,7 +203,7 @@ services:
 
   # Email service
   email:
-    image: muraligorantla/email:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-email
     container_name: email
     build:
       context: ./
@@ -233,7 +233,7 @@ services:
 
   # Fraud Detection service
   fraud-detection:
-    image: muraligorantla/fraud-detection:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-fraud-detection
     container_name: fraud-detection
     build:
       context: ./
@@ -266,7 +266,7 @@ services:
 
   # Frontend
   frontend:
-    image: muraligorantla/frontend:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-frontend
     container_name: frontend
     build:
       context: ./
@@ -327,7 +327,7 @@ services:
 
   # Frontend Proxy (Envoy)
   frontend-proxy:
-    image: muraligorantla/frontend-proxy:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-frontend-proxy
     container_name: frontend-proxy
     build:
       context: ./
@@ -380,7 +380,7 @@ services:
 
   # image-provider
   image-provider:
-    image: muraligorantla/image-provider:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-image-provider
     container_name: image-provider
     build:
       context: ./
@@ -407,7 +407,7 @@ services:
 
   # Load Generator
   load-generator:
-    image: muraligorantla/load-generator:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-load-generator
     container_name: load-generator
     build:
       context: ./
@@ -446,7 +446,7 @@ services:
 
   # Payment service
   payment:
-    image: muraligorantla/payment:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-payment
     container_name: payment
     build:
       context: ./
@@ -478,7 +478,7 @@ services:
 
   # Product Catalog service
   product-catalog:
-    image: muraligorantla/product-catalog:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-product-catalog
     container_name: product-catalog
     build:
       context: ./
@@ -513,7 +513,7 @@ services:
 
   # Quote service
   quote:
-    image: muraligorantla/quote:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-quote
     container_name: quote
     build:
       context: ./
@@ -543,7 +543,7 @@ services:
 
   # Recommendation service
   recommendation:
-    image: muraligorantla/recommendation:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-recommendation
     container_name: recommendation
     build:
       context: ./
@@ -579,7 +579,7 @@ services:
 
   # Shipping service
   shipping:
-    image: muraligorantla/shipping:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-shipping
     container_name: shipping
     build:
       context: ./
@@ -639,7 +639,7 @@ services:
 
   # Flagd UI for configuring the feature flag service
   flagd-ui:
-    image: muraligorantla/flagd-ui:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-flagd-ui
     container_name: flagd-ui
     build:
       context: ./
@@ -671,7 +671,7 @@ services:
 
   # Kafka used by Checkout, Accounting, and Fraud Detection services
   kafka:
-    image: muraligorantla/kafka:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-kafka
     container_name: kafka
     build:
       context: ./
@@ -706,7 +706,7 @@ services:
 
   # Postgresql used by Accounting service
   postgresql:
-    image: muraligorantla/postgresql:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-postgresql
     container_name: postgresql
     build:
       context: ./
@@ -852,7 +852,6 @@ services:
 
   # OpenSearch
   opensearch:
-    image: muraligorantla/opensearch:s0
     container_name: opensearch
     build:
       context: ./
