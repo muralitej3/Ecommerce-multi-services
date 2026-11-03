@@ -3,16 +3,13 @@
 
 include:
   - path:
-      - docker-compose.yml     # depend on the main docker-compose file
-      - docker-compose-tests_include-override.yml  # include override for tests
+      - docker-compose.yml
+      - docker-compose-tests_include-override.yml
 
 services:
-  # *****
-  # Tests
-  # *****
   # Frontend Tests
   frontendTests:
-    image: ${IMAGE_NAME}:${DEMO_VERSION}-frontend-tests
+    image: muraligorantla/frontend-tests:s0
     container_name: frontend-tests
     build:
       context: ./
@@ -29,7 +26,7 @@ services:
 
   # Tracebased Tests
   traceBasedTests:
-    image: ${IMAGE_NAME}:${DEMO_VERSION}-traceBasedTests
+    image: muraligorantla/trace-based-tests:s0
     container_name: traceBasedTests
     build:
       context: ./
@@ -54,42 +51,25 @@ services:
       - ./test/tracetesting:/app/test/tracetesting
       - ./pb:/app/pb
     depends_on:
-      tracetest-server:
-        condition: service_healthy
-      # adding demo services as dependencies
-      accounting:
-        condition: service_started
-      ad:
-        condition: service_started
-      cart:
-        condition: service_started
-      checkout:
-        condition: service_started
-      currency:
-        condition: service_started
-      email:
-        condition: service_started
-      fraud-detection:
-        condition: service_started
-      frontend:
-        condition: service_started
-      payment:
-        condition: service_started
-      product-catalog:
-        condition: service_started
-      quote:
-        condition: service_started
-      recommendation:
-        condition: service_started
-      shipping:
-        condition: service_started
-      flagd:
-        condition: service_started
-      kafka:
-        condition: service_started
+      - tracetest-server
+      - accounting
+      - ad
+      - cart
+      - checkout
+      - currency
+      - email
+      - fraud-detection
+      - frontend
+      - payment
+      - product-catalog
+      - quote
+      - recommendation
+      - shipping
+      - flagd
+      - kafka
 
   tracetest-server:
-    image: ${TRACETEST_IMAGE}
+    image: kubeshop/tracetest:CHECK_VERSION_IN_ENV   # copy TRACETEST_IMAGE from .env
     platform: linux/amd64
     container_name: tracetest-server
     volumes:
@@ -105,10 +85,8 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
-      tracetest-postgres:
-        condition: service_healthy
-      otel-collector:
-        condition: service_started
+      - tracetest-postgres
+      - otel-collector
     healthcheck:
       test: [ "CMD", "wget", "--spider", "localhost:11633" ]
       interval: 1s
@@ -116,7 +94,7 @@ services:
       retries: 60
 
   tracetest-postgres:
-    image: ${POSTGRES_IMAGE}
+    image: postgres:CHECK_VERSION_IN_ENV   # copy POSTGRES_IMAGE from .env
     container_name: tracetest-postgres
     environment:
       POSTGRES_PASSWORD: postgres
