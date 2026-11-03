@@ -1,16 +1,24 @@
+
 FROM python:3.12-slim-bookworm AS base
 
 WORKDIR /usr/src/app
 
-COPY requirements.txt ./
+# Copy requirements file
+COPY ./src/recommendation/requirements.txt ./
 
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Copy recommendation application source
+COPY ./src/recommendation/ ./
 
-RUN opentelemetry-bootstrap -a install 
+# Install OpenTelemetry instrumentation
+RUN opentelemetry-bootstrap -a install
 
-ENV RECOMMENDATION_PORT 1010
+# Application port
+ENV RECOMMENDATION_PORT=1010
 
+# Start application
 ENTRYPOINT ["python", "recommendation_server.py"]
+
