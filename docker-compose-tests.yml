@@ -3,13 +3,16 @@
 
 include:
   - path:
-      - docker-compose.yml
-      - docker-compose-tests_include-override.yml
+      - docker-compose.yml     # depend on the main docker-compose file
+      - docker-compose-tests_include-override.yml  # include override for tests
 
 services:
-  # Frontend tests
+  # *****
+  # Tests
+  # *****
+  # Frontend Tests
   frontendTests:
-    image: muraligorantla/frontend-tests:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-frontend-tests
     container_name: frontend-tests
     build:
       context: ./
@@ -24,9 +27,9 @@ services:
     depends_on:
       - frontend
 
-  # Trace-based tests
+  # Tracebased Tests
   traceBasedTests:
-    image: muraligorantla/trace-based-tests:s0
+    image: ${IMAGE_NAME}:${DEMO_VERSION}-traceBasedTests
     container_name: traceBasedTests
     build:
       context: ./
@@ -53,6 +56,7 @@ services:
     depends_on:
       tracetest-server:
         condition: service_healthy
+      # adding demo services as dependencies
       accounting:
         condition: service_started
       ad:
