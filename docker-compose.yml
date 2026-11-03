@@ -19,7 +19,7 @@ services:
   # ******************
   # Accounting service
   accounting:
-    image: ${IMAGE_NAME}:${DEMO_VERSION}-accounting
+    image: muraligorantla/accounting:s0
     container_name: accounting
     build:
       context: ./
@@ -46,7 +46,7 @@ services:
         condition: service_healthy
     logging: *logging
 
-  # AdService
+ # AdService
   ad:
     image: ${IMAGE_NAME}:${DEMO_VERSION}-ad
     container_name: ad
@@ -62,7 +62,7 @@ services:
         limits:
           memory: 300M
     restart: unless-stopped
-    ports:
+    port s:
       - "${AD_PORT}"
     environment:
       - AD_PORT
