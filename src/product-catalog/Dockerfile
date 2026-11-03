@@ -1,31 +1,36 @@
+
+# Copyright The OpenTelemetry Authors
+# SPDX-License-Identifier: Apache-2.0
+
 FROM golang:1.22-alpine AS builder
 
 WORKDIR /usr/src/app/
 
-# Use Go build cache for dependencies
-RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=cache,target=/root/.cache/go-build \
-    mkdir -p /root/.cache/go-build
+# Copy Go dependency files
+COPY ./src/product-catalog/go.mod ./
+COPY ./src/product-catalog/go.sum ./
 
-# Copy
-COPY go.mod go.sum ./
-
-# Download
+# Download Go dependencies
 RUN go mod download
 
-# Copy the rest of the source code
-COPY . .
+# Copy application source code
+COPY ./src/product-catalog/ ./
 
+# Build application
 RUN go build -o product-catalog .
 
-####################################
+################################################
 
-FROM alpine AS release
+FROM alpine:latest AS release
 
 WORKDIR /usr/src/app/
 
-COPY ./products/ ./products/
-COPY --from=builder /usr/src/app/product-catalog/ ./
+# Copy compiled binary
+COPY --from=builder /usr/src/app/product-catalog ./
 
-ENV PRODUCT_CATALOG_PORT=8088
-ENTRYPOINT [ "./product-catalog" ]
+# Copy products directory if required by the application
+COPY ./src/product-catalog/products/ ./products/
+
+EXPOSE 8080
+
+ENTRYPOINT ["./product-catalog"]
