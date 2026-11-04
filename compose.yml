@@ -132,6 +132,7 @@ services:
   currency:
     image: muraligorantla/currency:s0
     container_name: currency
+    command: ["7001"]
     deploy:
       resources:
         limits:
