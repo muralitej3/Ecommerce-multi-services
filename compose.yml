@@ -1,18 +1,12 @@
-# Copyright The OpenTelemetry Authors
-# SPDX-License-Identifier: Apache-2.0
+version: "3.8"
 
 services:
-  # ******************
-  # Core Demo Services
-  # ******************
-  # Accounting service
   accounting:
     image: muraligorantla/accounting:s0
     deploy:
       resources:
         limits:
           memory: 120M
-    restart: unless-stopped
     environment:
       - KAFKA_ADDR
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:${OTEL_COLLECTOR_PORT_HTTP}
@@ -26,14 +20,12 @@ services:
       - kafka
       - postgresql
 
-  # AdService
   ad:
     image: muraligorantla/ad:s0
     deploy:
       resources:
         limits:
           memory: 300M
-    restart: unless-stopped
     environment:
       - AD_PORT
       - FLAGD_HOST
@@ -48,14 +40,12 @@ services:
       - otel-collector
       - flagd
 
-  # Cart service
   cart:
     image: muraligorantla/cart:s0
     deploy:
       resources:
         limits:
           memory: 160M
-    restart: unless-stopped
     environment:
       - CART_PORT
       - FLAGD_HOST
@@ -71,14 +61,12 @@ services:
       - otel-collector
       - flagd
 
-  # Checkout service
   checkout:
     image: muraligorantla/checkout:s0
     deploy:
       resources:
         limits:
           memory: 20M
-    restart: unless-stopped
     environment:
       - FLAGD_HOST
       - FLAGD_PORT
@@ -106,7 +94,6 @@ services:
       - kafka
       - flagd
 
-  # Currency service
   currency:
     image: muraligorantla/currency:s0
     command: ["7001"]
@@ -114,7 +101,6 @@ services:
       resources:
         limits:
           memory: 20M
-    restart: unless-stopped
     environment:
       - CURRENCY_PORT
       - IPV6_ENABLED
@@ -126,14 +112,12 @@ services:
     depends_on:
       - otel-collector
 
-  # Email service
   email:
     image: muraligorantla/email:s0
     deploy:
       resources:
         limits:
           memory: 100M
-    restart: unless-stopped
     environment:
       - APP_ENV=production
       - EMAIL_PORT
@@ -146,14 +130,12 @@ services:
     depends_on:
       - otel-collector
 
-  # Fraud Detection service
   fraud-detection:
     image: muraligorantla/fraud-detection:s0
     deploy:
       resources:
         limits:
           memory: 300M
-    restart: unless-stopped
     environment:
       - FLAGD_HOST
       - FLAGD_PORT
@@ -168,14 +150,12 @@ services:
       - otel-collector
       - kafka
 
-  # Frontend
   frontend:
     image: muraligorantla/frontend:s0
     deploy:
       resources:
         limits:
           memory: 250M
-    restart: unless-stopped
     environment:
       - PORT=${FRONTEND_PORT}
       - FRONTEND_ADDR
@@ -209,14 +189,12 @@ services:
       - image-provider
       - flagd
 
-  # Frontend Proxy (Envoy)
   frontend-proxy:
     image: muraligorantla/frontend-proxy:s0
     deploy:
       resources:
         limits:
           memory: 65M
-    restart: unless-stopped
     ports:
       - "8081:${ENVOY_PORT}"
       - "${ENVOY_ADMIN_PORT}:${ENVOY_ADMIN_PORT}"
@@ -250,14 +228,12 @@ services:
       - grafana
       - flagd-ui
 
-  # image-provider
   image-provider:
     image: muraligorantla/image-provider:s0
     deploy:
       resources:
         limits:
           memory: 120M
-    restart: unless-stopped
     environment:
       - IMAGE_PROVIDER_PORT
       - OTEL_COLLECTOR_HOST
@@ -267,14 +243,12 @@ services:
     depends_on:
       - otel-collector
 
-  # Load Generator
   load-generator:
     image: muraligorantla/load-generator:s0
     deploy:
       resources:
         limits:
           memory: 1500M
-    restart: unless-stopped
     environment:
       - LOCUST_WEB_PORT
       - LOCUST_USERS
@@ -295,14 +269,12 @@ services:
       - frontend
       - flagd
 
-  # Payment service
   payment:
     image: muraligorantla/payment:s0
     deploy:
       resources:
         limits:
           memory: 120M
-    restart: unless-stopped
     environment:
       - IPV6_ENABLED
       - PAYMENT_PORT
@@ -316,14 +288,12 @@ services:
       - otel-collector
       - flagd
 
-  # Product Catalog service
   product-catalog:
     image: muraligorantla/product-catalog:s0
     deploy:
       resources:
         limits:
           memory: 20M
-    restart: unless-stopped
     environment:
       - PRODUCT_CATALOG_PORT
       - PRODUCT_CATALOG_RELOAD_INTERVAL
@@ -340,14 +310,12 @@ services:
       - otel-collector
       - flagd
 
-  # Quote service
   quote:
     image: muraligorantla/quote:s0
     deploy:
       resources:
         limits:
           memory: 40M
-    restart: unless-stopped
     environment:
       - IPV6_ENABLED
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:${OTEL_COLLECTOR_PORT_HTTP}
@@ -360,14 +328,12 @@ services:
     depends_on:
       - otel-collector
 
-  # Recommendation service
   recommendation:
     image: muraligorantla/recommendation:s0
     deploy:
       resources:
         limits:
           memory: 500M
-    restart: unless-stopped
     environment:
       - RECOMMENDATION_PORT
       - PRODUCT_CATALOG_ADDR
@@ -384,14 +350,12 @@ services:
       - otel-collector
       - flagd
 
-  # Shipping service
   shipping:
     image: muraligorantla/shipping:s0
     deploy:
       resources:
         limits:
           memory: 20M
-    restart: unless-stopped
     environment:
       - IPV6_ENABLED
       - SHIPPING_PORT
@@ -403,17 +367,12 @@ services:
     depends_on:
       - otel-collector
 
-  # ******************
-  # Dependent Services
-  # ******************
-  # Flagd, feature flagging service
   flagd:
     image: ${FLAGD_IMAGE}
     deploy:
       resources:
         limits:
           memory: 75M
-    restart: unless-stopped
     environment:
       - FLAGD_OTEL_COLLECTOR_URI=${OTEL_COLLECTOR_HOST}:${OTEL_COLLECTOR_PORT_GRPC}
       - FLAGD_METRICS_EXPORTER=otel
@@ -428,14 +387,12 @@ services:
     volumes:
       - ./src/flagd:/etc/flagd
 
-  # Flagd UI for configuring the feature flag service
   flagd-ui:
     image: muraligorantla/flagd-ui:s0
     deploy:
       resources:
         limits:
           memory: 200M
-    restart: always
     environment:
       - FLAGD_UI_PORT
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:${OTEL_COLLECTOR_PORT_HTTP}
@@ -450,14 +407,12 @@ services:
     volumes:
       - ./src/flagd:/app/data
 
-  # Kafka used by Checkout, Accounting, and Fraud Detection services
   kafka:
     image: muraligorantla/kafka:s0
     deploy:
       resources:
         limits:
-          memory: 620M
-    restart: unless-stopped
+          memory: 1024M
     environment:
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${KAFKA_HOST}:9092
       - KAFKA_LISTENERS=PLAINTEXT://${KAFKA_HOST}:9092,CONTROLLER://${KAFKA_HOST}:9093
@@ -466,7 +421,7 @@ services:
       - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=kafka
-      - KAFKA_HEAP_OPTS=-Xmx400m -Xms400m
+      - KAFKA_HEAP_OPTS=-Xmx800m -Xms800m
       - _JAVA_OPTIONS
     healthcheck:
       test: nc -z kafka 9092
@@ -475,20 +430,17 @@ services:
       timeout: 10s
       retries: 10
 
-  # Postgresql used by Accounting service
   postgresql:
     image: muraligorantla/postgresql:s0
     deploy:
       resources:
         limits:
           memory: 80M
-    restart: unless-stopped
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD
       - POSTGRES_DB
 
-  # Valkey used by Cart service
   valkey-cart:
     image: ${VALKEY_IMAGE}
     user: valkey
@@ -496,12 +448,7 @@ services:
       resources:
         limits:
           memory: 20M
-    restart: unless-stopped
 
-  # ********************
-  # Telemetry Components
-  # ********************
-  # Jaeger
   jaeger:
     image: ${JAEGERTRACING_IMAGE}
     command:
@@ -510,7 +457,6 @@ services:
       resources:
         limits:
           memory: 1200M
-    restart: unless-stopped
     environment:
       - JAEGER_HOST
       - JAEGER_GRPC_PORT
@@ -521,28 +467,24 @@ services:
     volumes:
       - ./src/jaeger/config.yml:/etc/jaeger/config.yml
 
-  # Grafana
   grafana:
     image: ${GRAFANA_IMAGE}
     deploy:
       resources:
         limits:
           memory: 120M
-    restart: unless-stopped
     environment:
       - "GF_INSTALL_PLUGINS=grafana-opensearch-datasource"
     volumes:
       - ./src/grafana/grafana.ini:/etc/grafana/grafana.ini
       - ./src/grafana/provisioning/:/etc/grafana/provisioning/
 
-  # OpenTelemetry Collector
   otel-collector:
     image: ${COLLECTOR_CONTRIB_IMAGE}
     deploy:
       resources:
         limits:
-          memory: 200M
-    restart: unless-stopped
+          memory: 512M
     command: [ "--config=/etc/otelcol-config.yml", "--config=/etc/otelcol-config-extras.yml" ]
     user: 0:0
     volumes:
@@ -566,7 +508,6 @@ services:
       - POSTGRES_PASSWORD
       - GOMEMLIMIT=160MiB
 
-  # Prometheus
   prometheus:
     image: ${PROMETHEUS_IMAGE}
     command:
@@ -585,18 +526,15 @@ services:
       resources:
         limits:
           memory: 300M
-    restart: unless-stopped
     ports:
       - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
 
-  # OpenSearch
   opensearch:
     image: muraligorantla/opensearch:s0
     deploy:
       resources:
         limits:
           memory: 800M
-    restart: unless-stopped
     environment:
       - cluster.name=demo-cluster
       - node.name=demo-node
