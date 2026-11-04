@@ -8,7 +8,6 @@ services:
   # Accounting service
   accounting:
     image: muraligorantla/accounting:s0
-    # container_name is ignored in Swarm, but left for compatibility
     deploy:
       resources:
         limits:
@@ -217,11 +216,7 @@ services:
       resources:
         limits:
           memory: 65M
-      # Swarm replaces update_config for startup ordering
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 10
+    restart: unless-stopped
     ports:
       - "8081:${ENVOY_PORT}"
       - "${ENVOY_ADMIN_PORT}:${ENVOY_ADMIN_PORT}"
