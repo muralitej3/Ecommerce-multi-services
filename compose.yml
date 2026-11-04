@@ -8,7 +8,7 @@ services:
   # Accounting service
   accounting:
     image: muraligorantla/accounting:s0
-    container_name: accounting
+    # container_name is ignored in Swarm, but left for compatibility
     deploy:
       resources:
         limits:
@@ -23,17 +23,13 @@ services:
       - DB_CONNECTION_STRING=Host=${POSTGRES_HOST};Username=otelu;Password=otelp;Database=${POSTGRES_DB}
       - OTEL_DOTNET_AUTO_TRACES_ENTITYFRAMEWORKCORE_INSTRUMENTATION_ENABLED=false
     depends_on:
-      otel-collector:
-        condition: service_started
-      kafka:
-        condition: service_healthy
-      postgresql:
-        condition: service_started
+      - otel-collector
+      - kafka
+      - postgresql
 
   # AdService
   ad:
     image: muraligorantla/ad:s0
-    container_name: ad
     deploy:
       resources:
         limits:
@@ -48,18 +44,14 @@ services:
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_LOGS_EXPORTER=otlp
       - OTEL_SERVICE_NAME=ad
-      # Workaround on OSX for https://bugs.openjdk.org/browse/JDK-8345296
       - _JAVA_OPTIONS
     depends_on:
-      otel-collector:
-        condition: service_started
-      flagd:
-        condition: service_started
+      - otel-collector
+      - flagd
 
   # Cart service
   cart:
     image: muraligorantla/cart:s0
-    container_name: cart
     deploy:
       resources:
         limits:
@@ -76,17 +68,13 @@ services:
       - OTEL_SERVICE_NAME=cart
       - ASPNETCORE_URLS=http://*:${CART_PORT}
     depends_on:
-      valkey-cart:
-        condition: service_started
-      otel-collector:
-        condition: service_started
-      flagd:
-        condition: service_started
+      - valkey-cart
+      - otel-collector
+      - flagd
 
   # Checkout service
   checkout:
     image: muraligorantla/checkout:s0
-    container_name: checkout
     deploy:
       resources:
         limits:
@@ -109,29 +97,19 @@ services:
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=checkout
     depends_on:
-      cart:
-        condition: service_started
-      currency:
-        condition: service_started
-      email:
-        condition: service_started
-      payment:
-        condition: service_started
-      product-catalog:
-        condition: service_started
-      shipping:
-        condition: service_started
-      otel-collector:
-        condition: service_started
-      kafka:
-        condition: service_healthy
-      flagd:
-        condition: service_started
+      - cart
+      - currency
+      - email
+      - payment
+      - product-catalog
+      - shipping
+      - otel-collector
+      - kafka
+      - flagd
 
   # Currency service
   currency:
     image: muraligorantla/currency:s0
-    container_name: currency
     command: ["7001"]
     deploy:
       resources:
@@ -147,13 +125,11 @@ services:
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=currency
     depends_on:
-      otel-collector:
-        condition: service_started
+      - otel-collector
 
   # Email service
   email:
     image: muraligorantla/email:s0
-    container_name: email
     deploy:
       resources:
         limits:
@@ -169,13 +145,11 @@ services:
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=email
     depends_on:
-      otel-collector:
-        condition: service_started
+      - otel-collector
 
   # Fraud Detection service
   fraud-detection:
     image: muraligorantla/fraud-detection:s0
-    container_name: fraud-detection
     deploy:
       resources:
         limits:
@@ -192,15 +166,12 @@ services:
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=fraud-detection
     depends_on:
-      otel-collector:
-        condition: service_started
-      kafka:
-        condition: service_healthy
+      - otel-collector
+      - kafka
 
   # Frontend
   frontend:
     image: muraligorantla/frontend:s0
-    container_name: frontend
     deploy:
       resources:
         limits:
@@ -227,38 +198,30 @@ services:
       - FLAGD_HOST
       - FLAGD_PORT
     depends_on:
-      ad:
-        condition: service_started
-      cart:
-        condition: service_started
-      checkout:
-        condition: service_started
-      currency:
-        condition: service_started
-      product-catalog:
-        condition: service_started
-      quote:
-        condition: service_started
-      recommendation:
-        condition: service_started
-      shipping:
-        condition: service_started
-      otel-collector:
-        condition: service_started
-      image-provider:
-        condition: service_started
-      flagd:
-        condition: service_started
+      - ad
+      - cart
+      - checkout
+      - currency
+      - product-catalog
+      - quote
+      - recommendation
+      - shipping
+      - otel-collector
+      - image-provider
+      - flagd
 
   # Frontend Proxy (Envoy)
   frontend-proxy:
     image: muraligorantla/frontend-proxy:s0
-    container_name: frontend-proxy
     deploy:
       resources:
         limits:
           memory: 65M
-    restart: unless-stopped
+      # Swarm replaces update_config for startup ordering
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
     ports:
       - "8081:${ENVOY_PORT}"
       - "${ENVOY_ADMIN_PORT}:${ENVOY_ADMIN_PORT}"
@@ -286,22 +249,15 @@ services:
       - FLAGD_UI_HOST
       - FLAGD_UI_PORT
     depends_on:
-      frontend:
-        condition: service_started
-      load-generator:
-        condition: service_started
-      jaeger:
-        condition: service_started
-      grafana:
-        condition: service_started
-      flagd-ui:
-        condition: service_started
-    dns_search: ""
+      - frontend
+      - load-generator
+      - jaeger
+      - grafana
+      - flagd-ui
 
   # image-provider
   image-provider:
     image: muraligorantla/image-provider:s0
-    container_name: image-provider
     deploy:
       resources:
         limits:
@@ -314,13 +270,11 @@ services:
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=image-provider
     depends_on:
-      otel-collector:
-        condition: service_started
+      - otel-collector
 
   # Load Generator
   load-generator:
     image: muraligorantla/load-generator:s0
-    container_name: load-generator
     deploy:
       resources:
         limits:
@@ -343,15 +297,12 @@ services:
       - FLAGD_PORT
       - FLAGD_OFREP_PORT
     depends_on:
-      frontend:
-        condition: service_started
-      flagd:
-        condition: service_started
+      - frontend
+      - flagd
 
   # Payment service
   payment:
     image: muraligorantla/payment:s0
-    container_name: payment
     deploy:
       resources:
         limits:
@@ -367,15 +318,12 @@ services:
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=payment
     depends_on:
-      otel-collector:
-        condition: service_started
-      flagd:
-        condition: service_started
+      - otel-collector
+      - flagd
 
   # Product Catalog service
   product-catalog:
     image: muraligorantla/product-catalog:s0
-    container_name: product-catalog
     deploy:
       resources:
         limits:
@@ -394,15 +342,12 @@ services:
     volumes:
       - ./src/product-catalog/products:/usr/src/app/products
     depends_on:
-      otel-collector:
-        condition: service_started
-      flagd:
-        condition: service_started
+      - otel-collector
+      - flagd
 
   # Quote service
   quote:
     image: muraligorantla/quote:s0
-    container_name: quote
     deploy:
       resources:
         limits:
@@ -418,17 +363,15 @@ services:
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=quote
     depends_on:
-      otel-collector:
-        condition: service_started
+      - otel-collector
 
   # Recommendation service
   recommendation:
     image: muraligorantla/recommendation:s0
-    container_name: recommendation
     deploy:
       resources:
         limits:
-          memory: 500M               # This is high to enable supporting the recommendationCache feature flag use case
+          memory: 500M
     restart: unless-stopped
     environment:
       - RECOMMENDATION_PORT
@@ -442,17 +385,13 @@ services:
       - OTEL_SERVICE_NAME=recommendation
       - PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
     depends_on:
-      product-catalog:
-        condition: service_started
-      otel-collector:
-        condition: service_started
-      flagd:
-        condition: service_started
+      - product-catalog
+      - otel-collector
+      - flagd
 
   # Shipping service
   shipping:
     image: muraligorantla/shipping:s0
-    container_name: shipping
     deploy:
       resources:
         limits:
@@ -467,8 +406,7 @@ services:
       - OTEL_SERVICE_NAME=shipping
       - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
     depends_on:
-      otel-collector:
-        condition: service_started
+      - otel-collector
 
   # ******************
   # Dependent Services
@@ -476,7 +414,6 @@ services:
   # Flagd, feature flagging service
   flagd:
     image: ${FLAGD_IMAGE}
-    container_name: flagd
     deploy:
       resources:
         limits:
@@ -499,7 +436,6 @@ services:
   # Flagd UI for configuring the feature flag service
   flagd-ui:
     image: muraligorantla/flagd-ui:s0
-    container_name: flagd-ui
     deploy:
       resources:
         limits:
@@ -514,17 +450,14 @@ services:
       - SECRET_KEY_BASE=yYrECL4qbNwleYInGJYvVnSkwJuSQJ4ijPTx5tirGUXrbznFIBFVJdPl5t6O9ASw
       - PHX_HOST=localhost
     depends_on:
-      otel-collector:
-        condition: service_started
-      flagd:
-        condition: service_started
+      - otel-collector
+      - flagd
     volumes:
       - ./src/flagd:/app/data
 
   # Kafka used by Checkout, Accounting, and Fraud Detection services
   kafka:
     image: muraligorantla/kafka:s0
-    container_name: kafka
     deploy:
       resources:
         limits:
@@ -539,7 +472,6 @@ services:
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=kafka
       - KAFKA_HEAP_OPTS=-Xmx400m -Xms400m
-      # Workaround on OSX for https://bugs.openjdk.org/browse/JDK-8345296
       - _JAVA_OPTIONS
     healthcheck:
       test: nc -z kafka 9092
@@ -551,7 +483,6 @@ services:
   # Postgresql used by Accounting service
   postgresql:
     image: muraligorantla/postgresql:s0
-    container_name: postgresql
     deploy:
       resources:
         limits:
@@ -565,7 +496,6 @@ services:
   # Valkey used by Cart service
   valkey-cart:
     image: ${VALKEY_IMAGE}
-    container_name: valkey-cart
     user: valkey
     deploy:
       resources:
@@ -579,7 +509,6 @@ services:
   # Jaeger
   jaeger:
     image: ${JAEGERTRACING_IMAGE}
-    container_name: jaeger
     command:
       - "--config=file:/etc/jaeger/config.yml"
     deploy:
@@ -600,7 +529,6 @@ services:
   # Grafana
   grafana:
     image: ${GRAFANA_IMAGE}
-    container_name: grafana
     deploy:
       resources:
         limits:
@@ -615,7 +543,6 @@ services:
   # OpenTelemetry Collector
   otel-collector:
     image: ${COLLECTOR_CONTRIB_IMAGE}
-    container_name: otel-collector
     deploy:
       resources:
         limits:
@@ -629,10 +556,8 @@ services:
       - ${OTEL_COLLECTOR_CONFIG}:/etc/otelcol-config.yml
       - ${OTEL_COLLECTOR_CONFIG_EXTRAS}:/etc/otelcol-config-extras.yml
     depends_on:
-      jaeger:
-        condition: service_started
-      opensearch:
-        condition: service_healthy
+      - jaeger
+      - opensearch
     environment:
       - FRONTEND_PROXY_ADDR
       - IMAGE_PROVIDER_HOST
@@ -649,7 +574,6 @@ services:
   # Prometheus
   prometheus:
     image: ${PROMETHEUS_IMAGE}
-    container_name: prometheus
     command:
       - --web.console.templates=/etc/prometheus/consoles
       - --web.console.libraries=/etc/prometheus/console_libraries
@@ -673,7 +597,6 @@ services:
   # OpenSearch
   opensearch:
     image: muraligorantla/opensearch:s0
-    container_name: opensearch
     deploy:
       resources:
         limits:
@@ -687,7 +610,6 @@ services:
       - OPENSEARCH_JAVA_OPTS=-Xms400m -Xmx400m
       - DISABLE_INSTALL_DEMO_CONFIG=true
       - DISABLE_SECURITY_PLUGIN=true
-      # Workaround on OSX for https://bugs.openjdk.org/browse/JDK-8345296
       - _JAVA_OPTIONS
     ulimits:
       memlock:
